@@ -1,0 +1,1224 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>AtomCode 100B — 原子创造者激励计划</title>
+<meta name="description" content="加入 AtomCode 原子创造者激励计划，1000 亿 Tokens 面向全球开发者限时发放">
+<style>
+  /* ---------- reset ---------- */
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:#000;color:#fff;font-family:"PingFang SC","Microsoft YaHei",Inter,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;border:none;background:none;color:inherit;cursor:pointer;padding:0}
+  :root{
+    --bg:#000;
+    --paper:#f6f3ec;
+    --ink:#0d0d0d;
+    --muted:rgba(255,255,255,.55);
+    --line:rgba(255,255,255,.15);
+    --accent:#e8a050;
+    --hero-text:linear-gradient(90deg,#7e8f9e,#b0beca 45%,#fff);
+    --mono:Menlo,Monaco,Consolas,"Courier New",monospace;
+    --serif:Georgia,"Times New Roman",serif;
+  }
+
+  /* ---------- page-wide aurora glow (follows cursor everywhere) ---------- */
+  .aurora{
+    position:fixed;inset:0;z-index:9000;pointer-events:none;
+    background:
+      radial-gradient(circle 360px at var(--mx,-200px) var(--my,-200px),
+        rgba(232,160,80,.22) 0%,
+        rgba(232,160,80,.08) 28%,
+        rgba(232,160,80,0) 60%),
+      radial-gradient(circle 700px at var(--mx,-200px) var(--my,-200px),
+        rgba(150,180,220,.06) 0%,
+        rgba(150,180,220,0) 70%);
+    mix-blend-mode:screen;
+    transition:opacity .25s;
+  }
+
+  /* ---------- scroll progress ---------- */
+  .progress-track{
+    position:fixed;top:0;left:0;right:0;height:2px;z-index:1001;
+    background:rgba(255,255,255,.04);pointer-events:none;
+  }
+  .progress-bar{
+    height:100%;width:0%;
+    background:linear-gradient(90deg,#e8a050 0%,#f6f3ec 60%,#e8a050 100%);
+    background-size:200% 100%;
+    box-shadow:0 0 10px rgba(232,160,80,.6),0 0 22px rgba(232,160,80,.25);
+    animation:progressShine 3s linear infinite;
+    transition:width .12s linear;
+  }
+  @keyframes progressShine{0%{background-position:0 0}100%{background-position:200% 0}}
+  .progress-bar.past-hero{background:linear-gradient(90deg,#0d0d0d,#0d0d0d 50%,#e8a050)}
+
+  /* ---------- magnetic elements ---------- */
+  [data-magnetic]{
+    transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .25s ease;
+    will-change:transform;
+  }
+  [data-magnetic].is-near{
+    box-shadow:0 0 0 1px rgba(232,160,80,.4),0 8px 24px rgba(232,160,80,.22);
+  }
+
+  /* ---------- click ripple ---------- */
+  .ripple{
+    position:fixed;left:0;top:0;width:8px;height:8px;
+    border-radius:50%;pointer-events:none;z-index:9100;
+    background:rgba(232,160,80,.55);
+    transform:translate(-50%,-50%);
+    animation:rippleExpand .65s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  @keyframes rippleExpand{
+    0%{width:6px;height:6px;background:rgba(232,160,80,.85);box-shadow:0 0 0 0 rgba(232,160,80,.6)}
+    100%{width:160px;height:160px;background:rgba(232,160,80,0);box-shadow:0 0 0 30px rgba(232,160,80,0)}
+  }
+
+  /* ---------- magnifier cursor — minimal glass lens ---------- */
+  .magnifier{
+    position:fixed;top:0;left:0;z-index:9999;
+    width:260px;height:260px;border-radius:50%;
+    pointer-events:none;opacity:0;
+    transform:translate(-9999px,-9999px) translate(-50%,-50%);
+    transition:opacity .25s ease, transform .05s linear;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.9),
+      0 0 0 6px rgba(255,255,255,.05),
+      0 0 0 7px rgba(255,255,255,.15),
+      0 0 80px rgba(232,160,80,.18),
+      0 30px 60px rgba(0,0,0,.55);
+    overflow:hidden;
+    backdrop-filter:blur(.5px);-webkit-backdrop-filter:blur(.5px);
+  }
+  .magnifier::before{
+    content:"";position:absolute;inset:0;border-radius:50%;
+    background:
+      radial-gradient(circle at 30% 22%, rgba(255,255,255,.12), rgba(255,255,255,0) 50%),
+      radial-gradient(circle at 70% 85%, rgba(0,0,0,.25), rgba(0,0,0,0) 55%);
+    pointer-events:none;z-index:2;
+  }
+  .magnifier::after{
+    content:"";position:absolute;left:50%;top:50%;
+    width:5px;height:5px;border-radius:50%;
+    background:#fff;opacity:.9;
+    box-shadow:0 0 0 3px rgba(255,255,255,.12),0 0 14px rgba(255,255,255,.55);
+    transform:translate(-50%,-50%);z-index:3;
+  }
+  .magnifier canvas{display:block;width:100%;height:100%}
+  @media (hover:none),(max-width:768px){ .magnifier{display:none!important} }
+
+  /* ---------- header ---------- */
+  .hdr{
+    --hdr-color:#fff;--hdr-bg:transparent;--hdr-border:none;
+    --dot-bg:#fff;--btn-color:#fff;--btn-border:rgba(255,255,255,.35);
+    --share-border:rgba(255,255,255,.6);--btn-hover-bg:#fff;--btn-hover-color:#000;
+    position:fixed;top:0;left:0;right:0;z-index:1000;
+    height:60px;padding:0 30px;
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:var(--mono);color:var(--hdr-color);background:var(--hdr-bg);
+    backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+    border-bottom:var(--hdr-border);
+    transition:color .3s,background .3s,border-color .3s;
+  }
+  .hdr.past-hero{--hdr-color:#0d0d0d;--hdr-bg:#f6f3ec;--hdr-border:1px solid #e0ddd6;--dot-bg:#0d0d0d;--btn-color:#0d0d0d;--btn-border:#e0ddd6;--share-border:#0d0d0d}
+  .hdr-left{display:flex;gap:16px;align-items:center}
+  .hdr-logo{display:flex;align-items:center;gap:8px;font-family:Inter,sans-serif;font-weight:600;font-size:14px;letter-spacing:.5px}
+  .hdr-logo svg{display:block}
+  .hdr-status{display:flex;gap:10px;align-items:center;font-size:11px;letter-spacing:2.2px;white-space:nowrap}
+  .status-dot{width:6px;height:6px;border-radius:50%;background:var(--dot-bg);animation:dotPulse 2.2s ease-in-out infinite}
+  @keyframes dotPulse{0%,50%{opacity:1}25%{opacity:.25}}
+  .hdr-right{display:flex;gap:15px;align-items:center}
+  .hdr-time{font-size:11px;letter-spacing:1.98px;white-space:nowrap}
+  .icon-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--hdr-color);opacity:1;transition:opacity .2s}
+  .icon-btn:hover{opacity:.7}
+  .share-btn{height:30px;padding:0 16px;font-family:"PingFang SC","Microsoft YaHei",sans-serif;font-size:11px;font-weight:500;color:var(--btn-color);letter-spacing:1.32px;background:transparent;border:1px solid var(--share-border);transition:background .2s,color .2s}
+  .share-btn:hover{background:var(--btn-hover-bg);color:var(--btn-hover-color)}
+  .wechat-wrap{position:relative}
+  .wechat-pop{
+    position:absolute;top:calc(100% + 10px);right:0;z-index:1001;
+    width:188px;padding:16px;background:#000;border:1px solid #e2e0d8;
+    display:flex;flex-direction:column;gap:12px;align-items:center;
+    opacity:0;transform:translateY(-4px);pointer-events:none;
+    transition:opacity .15s,transform .15s;
+  }
+  .wechat-wrap:hover .wechat-pop, .wechat-pop.open{opacity:1;transform:translateY(0);pointer-events:auto}
+  .wechat-pop .ttl{font-size:14px;color:#fff;white-space:nowrap}
+  .wechat-pop .sub{font-family:Inter,"Noto Sans SC",sans-serif;font-size:12px;color:#a8a49c;white-space:nowrap}
+  .qr-placeholder{width:140px;height:140px;background:repeating-conic-gradient(#fff 0 25%,#000 0 50%) 50%/8px 8px;border:6px solid #fff}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:none}
+  .hero-bg{position:absolute;inset:0;background:#0a0a0a;overflow:hidden;pointer-events:none}
+  .code-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .vignette-outer{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle,rgba(0,0,0,0) 60%,rgba(0,0,0,.9))}
+  .vignette-center{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at center,rgba(0,0,0,.55),rgba(0,0,0,0) 70%)}
+  .hero-overlay{position:absolute;inset:0;z-index:1;pointer-events:none;background:rgba(0,0,0,.45);backdrop-filter:blur(.4px);-webkit-backdrop-filter:blur(.4px)}
+  .hero-content{position:relative;z-index:2;width:min(977px,calc(100vw - 32px));padding:0 40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center}
+  .hero-title{
+    margin:0;font-family:Inter,"Segoe UI",sans-serif;font-size:52px;font-weight:600;line-height:60px;
+    white-space:nowrap;letter-spacing:-.5px;
+    background:var(--hero-text);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 2px 18px rgba(0,0,0,.85)) drop-shadow(0 0 32px rgba(0,0,0,.65));
+    animation:fadeInUp .6s ease-out both;
+  }
+  .token-block,.waitlist-btn{filter:drop-shadow(0 4px 22px rgba(0,0,0,.65))}
+  .hero-title .typed{display:inline}
+  .hero-title .caret{display:inline-block;width:3px;background:#fff;margin-left:4px;animation:blink 1s steps(1) infinite;-webkit-text-fill-color:#fff}
+  @keyframes blink{50%{opacity:0}}
+  .token-block{display:flex;flex-direction:column;gap:14px;align-items:center;animation:fadeInUp .6s ease-out .2s both}
+  .token-label{display:flex;gap:6px;align-items:center;font-family:var(--mono);font-size:11px;color:#fff;letter-spacing:3.85px;text-transform:uppercase;margin:0}
+  .token-number{margin:0;font-family:Inter,sans-serif;font-size:64px;font-weight:500;line-height:64px;letter-spacing:-1.7px;color:#fff;font-variant-numeric:tabular-nums}
+  .token-of{margin:0;font-family:var(--serif);font-size:13px;font-style:italic;color:#a8a49c}
+  .waitlist-btn{
+    width:min(534px,100%);height:55px;padding:0 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    background:rgba(246,243,236,.18);border:1px solid #fff;color:#fff;
+    backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+    transition:background .15s ease,letter-spacing .2s ease;
+    animation:fadeInUp .6s ease-out .4s both;
+  }
+  .waitlist-btn:hover{background:rgba(246,243,236,.34)}
+  .waitlist-text{font-family:var(--mono);font-size:12px;letter-spacing:2.16px;white-space:nowrap}
+  .waitlist-arrow{font-size:16px;line-height:1;transition:transform .2s ease}
+  .waitlist-btn:hover .waitlist-arrow{transform:translateX(4px)}
+  .scroll-down{position:absolute;bottom:48px;left:50%;transform:translateX(-50%);z-index:2;padding:8px;opacity:.6;transition:opacity .2s;animation:bob 1.8s ease-in-out infinite}
+  .scroll-down:hover{opacity:1}
+  @keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ---------- highlights strip ---------- */
+  .strip{background:#000;border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden}
+  .strip-track{display:flex;gap:64px;padding:18px 0;font-family:var(--mono);font-size:13px;letter-spacing:3px;color:rgba(255,255,255,.55);text-transform:uppercase;white-space:nowrap;animation:marquee 28s linear infinite}
+  .strip-track span{display:flex;align-items:center;gap:64px}
+  .strip-track span::after{content:"·";color:rgba(255,255,255,.3)}
+  @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* ---------- tiers ---------- */
+  .tiers{background:#000;padding:96px 0 32px}
+  .tiers-wrap{width:min(1100px,calc(100% - 60px));margin:0 auto}
+  .section-title-wrap{padding:0 12px 20px;border-bottom:1px solid var(--line);margin-bottom:32px}
+  .section-title{margin:0;font-family:var(--mono);font-size:16px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.4)}
+  .tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .tier{
+    position:relative;padding:32px 28px 28px;
+    border:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));
+    transform-style:preserve-3d;
+    transition:border-color .25s,background .25s,transform .35s cubic-bezier(.22,1,.36,1);
+    will-change:transform;
+  }
+  .tier::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(circle 220px at var(--sx,50%) var(--sy,50%),
+      rgba(232,160,80,.20),rgba(232,160,80,0) 60%);
+    opacity:0;transition:opacity .25s ease;
+    z-index:0;
+  }
+  .tier > *{position:relative;z-index:1}
+  .tier:hover{border-color:rgba(232,160,80,.55);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,0))}
+  .tier:hover::before{opacity:1}
+  .tier.featured{border-color:#fff}
+  .tier-tag{font-family:var(--mono);font-size:11px;letter-spacing:2.4px;color:var(--accent);text-transform:uppercase}
+  .tier-name{margin:12px 0 8px;font-family:Inter,sans-serif;font-size:28px;font-weight:600;color:#fff}
+  .tier-quota{font-family:Inter,sans-serif;font-size:42px;font-weight:500;color:#fff;letter-spacing:-1px}
+  .tier-quota .unit{font-size:14px;font-family:var(--mono);color:rgba(255,255,255,.55);letter-spacing:2px;margin-left:6px}
+  .tier-of{margin:2px 0 20px;font-family:var(--serif);font-size:12px;font-style:italic;color:#a8a49c}
+  .tier-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+  .tier-list li{font-family:var(--mono);font-size:13px;line-height:1.55;color:rgba(255,255,255,.7);padding-left:18px;position:relative}
+  .tier-list li::before{content:"→";position:absolute;left:0;color:var(--accent)}
+  .tier-cta{display:inline-flex;align-items:center;gap:8px;margin-top:24px;padding:10px 16px;border:1px solid rgba(255,255,255,.4);font-family:var(--mono);font-size:12px;letter-spacing:1.8px;transition:background .15s,color .15s}
+  .tier-cta:hover{background:#fff;color:#000}
+  .tier.featured::after{content:"RECOMMENDED";position:absolute;top:-1px;right:-1px;padding:6px 12px;background:var(--accent);color:#000;font-family:var(--mono);font-size:10px;letter-spacing:2px}
+
+  /* ---------- timeline ---------- */
+  .timeline{background:#000;padding:64px 0}
+  .timeline-wrap{width:min(1100px,calc(100% - 60px));margin:0 auto}
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+  .steps::before{content:"";position:absolute;top:36px;left:36px;right:36px;height:1px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.3) 0 6px,transparent 6px 12px)}
+  .step{position:relative;padding:0 16px}
+  .step-num{
+    position:relative;width:72px;height:72px;border:1px solid rgba(255,255,255,.4);
+    background:#000;display:flex;align-items:center;justify-content:center;
+    font-family:Inter,sans-serif;font-size:26px;font-weight:500;margin-bottom:20px;
+    transition:border-color .25s,color .25s,box-shadow .25s,transform .35s cubic-bezier(.22,1,.36,1);
+    will-change:transform;
+  }
+  .step-num::after{
+    content:"";position:absolute;inset:-1px;border-radius:1px;
+    background:conic-gradient(from var(--ang,0deg),rgba(232,160,80,.6),rgba(232,160,80,0) 35%);
+    mask:linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
+    -webkit-mask:linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+    padding:1px;
+    opacity:0;transition:opacity .3s;
+  }
+  .step:hover .step-num{
+    border-color:var(--accent);color:var(--accent);
+    box-shadow:0 0 0 1px rgba(232,160,80,.4),0 12px 32px rgba(232,160,80,.15);
+  }
+  .step:hover .step-num::after{opacity:1;animation:rot 3s linear infinite}
+  @keyframes rot{to{--ang:360deg}}
+  @property --ang{syntax:"<angle>";inherits:false;initial-value:0deg}
+  .step-label{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4);text-transform:uppercase;margin-bottom:8px}
+  .step-text{font-family:Inter,"PingFang SC",sans-serif;font-size:15px;line-height:1.55;color:rgba(255,255,255,.85)}
+
+  /* ---------- FAQ ---------- */
+  .faq{background:#000;padding:0 0 64px}
+  .faq-wrap{width:min(900px,calc(100% - 60px));margin:0 auto}
+  .faq-title-wrap{padding:65px 12px 12px;border-bottom:1px solid var(--line)}
+  .faq-title{margin:0;font-family:var(--mono);font-size:16px;color:rgba(255,255,255,.4);letter-spacing:3px;text-transform:uppercase}
+  .faq-list{display:flex;flex-direction:column}
+  .faq-item{
+    position:relative;padding:16px 0;
+    border-bottom:1px solid var(--line);cursor:pointer;
+    overflow:hidden;transition:background .25s ease;
+  }
+  .faq-item::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(90deg,
+      transparent 0%,
+      rgba(232,160,80,.10) 45%,
+      rgba(255,255,255,.06) 50%,
+      rgba(232,160,80,.10) 55%,
+      transparent 100%);
+    transform:translateX(-110%);
+    transition:transform .9s cubic-bezier(.22,1,.36,1);
+  }
+  .faq-item:hover::before{transform:translateX(110%)}
+  .faq-item:hover{background:rgba(232,160,80,.04)}
+  .faq-item .faq-q .num{transition:color .25s ease,letter-spacing .25s ease}
+  .faq-item:hover .faq-q .num{letter-spacing:2px}
+  .faq-item-inner{display:flex;flex-direction:column;gap:8px;padding:0 12px}
+  .faq-q{margin:0;font-family:var(--mono);font-size:14px;font-weight:400;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:16px}
+  .faq-q .num{color:var(--accent);margin-right:10px}
+  .faq-q .chev{transition:transform .25s ease;color:rgba(255,255,255,.5)}
+  .faq-item.open .faq-q .chev{transform:rotate(45deg);color:var(--accent)}
+  .faq-a{
+    margin:0;font-family:var(--mono);font-size:14px;line-height:19.2px;letter-spacing:.24px;color:rgba(255,255,255,.55);
+    max-height:0;overflow:hidden;transition:max-height .35s ease,padding .25s ease,opacity .2s ease;opacity:0;
+  }
+  .faq-item.open .faq-a{max-height:600px;opacity:1;padding-top:4px}
+  .faq-a .list{margin:6px 0 0;padding-left:18px}
+  .faq-a .list li{margin:2px 0}
+  .faq-a a{color:var(--accent);border-bottom:1px dashed var(--accent)}
+
+  /* ---------- footer ---------- */
+  .ftr{padding:40px 0 28px;text-align:center;font-family:Outfit,Inter,sans-serif;font-size:12px;color:rgba(255,255,255,.35);background:#000}
+  .ftr a{margin:0 4px;transition:opacity .2s}
+  .ftr a:hover{opacity:.8;color:#fff}
+
+  /* ---------- modal ---------- */
+  .overlay{position:fixed;inset:0;z-index:1200;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(5,5,8,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+  .overlay.show{display:flex;animation:overlayIn .2s ease}
+  @keyframes overlayIn{from{opacity:0}to{opacity:1}}
+  .dialog{position:relative;width:min(560px,100%);background:var(--paper);color:var(--ink);border:1px solid #000;border-radius:20px;box-shadow:0 20px 48px rgba(0,0,0,.4);font-family:var(--mono);max-height:90vh;overflow:auto}
+  .dialog-head{display:flex;align-items:center;justify-content:center;padding:18px 16px;position:relative}
+  .dialog-head .ttl{font-size:14px;letter-spacing:2px;color:#0d0d0d;text-transform:uppercase}
+  .dialog-close{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:24px;line-height:1;color:#222;cursor:pointer}
+  .dialog-body{padding:8px 24px 24px}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  .field label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#5f5a4f}
+  .field input,.field textarea,.field select{
+    font-family:var(--mono);font-size:14px;color:#0d0d0d;background:#fff;
+    padding:12px 14px;border:1px solid #d6d2c5;border-radius:8px;outline:none;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:#0d0d0d;box-shadow:0 0 0 3px rgba(13,13,13,.08)}
+  .field textarea{min-height:96px;resize:vertical}
+  .submit-btn{display:block;width:100%;padding:14px;background:#0d0d0d;color:#f6f3ec;font-family:var(--mono);font-size:13px;letter-spacing:2px;text-transform:uppercase;border-radius:10px;transition:opacity .2s}
+  .submit-btn:hover{opacity:.85}
+  .toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:2000;padding:12px 24px;font-size:13px;letter-spacing:1.4px;background:#000;color:#f6f3ec;border:1px solid #333;border-radius:6px;font-family:var(--mono);white-space:nowrap;opacity:0;transition:opacity .2s,transform .2s}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:980px){
+    .tier-grid{grid-template-columns:1fr;gap:14px}
+    .steps{grid-template-columns:repeat(2,1fr);gap:32px 0}
+    .steps::before{display:none}
+  }
+  @media (max-width:768px){
+    .hdr{height:52px;padding:0 16px}
+    .hdr-time,.hdr-status{display:none}
+    .hero{cursor:auto}
+    .hero-title{font-size:24px;line-height:36px;white-space:normal;padding:0 8px}
+    .token-number{font-size:34px;line-height:1;letter-spacing:-.8px}
+    .token-label{font-size:9px;letter-spacing:2.5px}
+    .token-of{font-size:11px}
+    .waitlist-btn{width:min(320px,100%);height:48px}
+    .waitlist-text{font-size:11px;letter-spacing:1.5px}
+    .tiers,.timeline{padding:56px 0}
+    .section-title{font-size:14px;letter-spacing:2px}
+    .faq-q{font-size:12px}
+    .faq-a{font-size:11px;line-height:1.7}
+  }
+</style>
+</head>
+<body>
+
+<!-- scroll progress bar -->
+<div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+
+<!-- page-wide cursor aurora glow -->
+<div class="aurora" id="aurora"></div>
+
+<!-- magnifier cursor -->
+<div class="magnifier" id="magnifier"><canvas id="magCanvas"></canvas></div>
+
+<!-- header -->
+<header class="hdr" id="hdr">
+  <div class="hdr-left">
+    <a class="hdr-logo" href="#top" aria-label="AtomCode">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <circle cx="10" cy="10" r="2.2" fill="currentColor"/>
+        <ellipse cx="10" cy="10" rx="8" ry="3" stroke="currentColor" stroke-width="1"/>
+        <ellipse cx="10" cy="10" rx="8" ry="3" stroke="currentColor" stroke-width="1" transform="rotate(60 10 10)"/>
+        <ellipse cx="10" cy="10" rx="8" ry="3" stroke="currentColor" stroke-width="1" transform="rotate(120 10 10)"/>
+      </svg>
+      AtomCode
+    </a>
+    <div class="hdr-status">
+      <span class="status-dot"></span>
+      <span>发放进行中</span>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <span class="hdr-time" id="countdown">倒计时 30D 00:00:00</span>
+    <a class="icon-btn" href="https://discord.com" target="_blank" rel="noopener" aria-label="Discord">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4.4A19.7 19.7 0 0 0 15.7 3l-.2.4a18.3 18.3 0 0 0-7 0L8.3 3A19.7 19.7 0 0 0 4 4.4C1 9 .3 13.5.6 17.9A20 20 0 0 0 6.6 21l.5-.7c-.7-.3-1.4-.6-2-1l.4-.3a14 14 0 0 0 12.8 0l.5.3c-.7.4-1.4.7-2 1l.4.7a20 20 0 0 0 6-3.1c.4-5-.7-9.4-3.2-13.5ZM8.5 15.2c-1.1 0-2-1-2-2.3 0-1.2.9-2.2 2-2.2s2 1 2 2.2-.8 2.3-2 2.3Zm7 0c-1.2 0-2-1-2-2.3 0-1.2.8-2.2 2-2.2s2 1 2 2.2-.9 2.3-2 2.3Z"/></svg>
+    </a>
+    <div class="wechat-wrap">
+      <button class="icon-btn" id="wechatBtn" aria-label="加入支持群">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4C4.6 4 1 6.9 1 10.4c0 2 1.2 3.8 3 5l-.7 2.2 2.6-1.4c.9.2 1.8.4 2.7.4h.5c-.1-.4-.1-.8-.1-1.2 0-3.4 3.3-6.2 7.3-6.2h.6C16.4 6 13 4 9 4Zm-3 4.8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm6 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm10 6.5c0-2.9-3-5.3-6.5-5.3s-6.5 2.4-6.5 5.3c0 3 3 5.3 6.5 5.3.7 0 1.4-.1 2-.3l2.3 1.2-.7-1.9c1.7-1 2.9-2.6 2.9-4.3Zm-9-.6a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6Zm5 0a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6Z"/></svg>
+      </button>
+      <div class="wechat-pop">
+        <div class="ttl">加入专属支持群</div>
+        <div class="qr-placeholder" aria-label="二维码占位"></div>
+        <div class="sub">飞书扫码加入</div>
+      </div>
+    </div>
+    <button class="share-btn" id="shareBtn" data-magnetic>分享</button>
+    <button class="share-btn" id="langBtn" data-magnetic>EN</button>
+  </div>
+</header>
+
+<!-- hero -->
+<section class="hero" id="top">
+  <div class="hero-bg">
+    <canvas class="code-canvas" id="codeBg"></canvas>
+    <div class="vignette-center"></div>
+    <div class="vignette-outer"></div>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1 class="hero-title"><span class="typed" id="typed"></span><span class="caret">&nbsp;</span></h1>
+    <div class="token-block">
+      <p class="token-label">剩余 TOKENS</p>
+      <p class="token-number" id="tokensLeft">100,000,000,000</p>
+      <p class="token-of">共 100,000,000,000 (1000 亿)</p>
+    </div>
+    <button class="waitlist-btn" data-modal="apply" id="applyBtn" data-magnetic>
+      <span class="waitlist-text">立即申请 · APPLY NOW</span>
+      <span class="waitlist-arrow">→</span>
+    </button>
+  </div>
+  <button class="scroll-down" aria-label="向下滚动" onclick="document.getElementById('tiers').scrollIntoView({behavior:'smooth'})">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.4"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+</section>
+
+<!-- marquee strip -->
+<div class="strip" aria-hidden="true">
+  <div class="strip-track">
+    <span>AtomCode × Claude Code</span><span>1000 亿 Tokens 限时发放</span><span>面向全球开发者</span><span>30 天 · 赠完即止</span><span>个人 · 团队 · 企业</span><span>AtomCode × Cursor</span><span>免费 · 完全免费</span>
+    <span>AtomCode × Claude Code</span><span>1000 亿 Tokens 限时发放</span><span>面向全球开发者</span><span>30 天 · 赠完即止</span><span>个人 · 团队 · 企业</span><span>AtomCode × Cursor</span><span>免费 · 完全免费</span>
+  </div>
+</div>
+
+<!-- tiers -->
+<section class="tiers" id="tiers">
+  <div class="tiers-wrap">
+    <div class="section-title-wrap">
+      <h2 class="section-title" data-scramble>// 01 · 权益档位 — TOKEN PLANS</h2>
+    </div>
+    <div class="tier-grid">
+      <div class="tier" data-cursor="SELECT">
+        <div class="tier-tag" data-scramble>Starter</div>
+        <h3 class="tier-name" data-scramble>起点档</h3>
+        <div class="tier-quota">5<span class="unit">亿 Tokens</span></div>
+        <p class="tier-of">面向个人开发者</p>
+        <ul class="tier-list">
+          <li>AtomCode V3 全模型可用</li>
+          <li>按量计费余额 ¥ 200</li>
+          <li>30 天有效期</li>
+          <li>社区基础支持</li>
+        </ul>
+        <a class="tier-cta" href="#" data-modal="apply" data-magnetic>申请 →</a>
+      </div>
+      <div class="tier featured" data-cursor="SELECT">
+        <div class="tier-tag" data-scramble>Creator</div>
+        <h3 class="tier-name" data-scramble>创造者档</h3>
+        <div class="tier-quota">30<span class="unit">亿 Tokens</span></div>
+        <p class="tier-of">面向独立创造者 / 小团队</p>
+        <ul class="tier-list">
+          <li>AtomCode V3 全模型 · 多模态</li>
+          <li>按量计费余额 ¥ 1,200</li>
+          <li>60 天有效期</li>
+          <li>专属 Discord 通道</li>
+          <li>Claude Code · Cursor 直连</li>
+        </ul>
+        <a class="tier-cta" href="#" data-modal="apply" data-magnetic>申请 →</a>
+      </div>
+      <div class="tier" data-cursor="SELECT">
+        <div class="tier-tag" data-scramble>Enterprise</div>
+        <h3 class="tier-name" data-scramble>企业档</h3>
+        <div class="tier-quota">100<span class="unit">亿 Tokens</span></div>
+        <p class="tier-of">面向企业 / 高质量项目</p>
+        <ul class="tier-list">
+          <li>定制配额 · 可叠加充值</li>
+          <li>按量计费余额 ¥ 5,000+</li>
+          <li>90 天有效期</li>
+          <li>1v1 技术对接 SA</li>
+          <li>优先评估通道</li>
+        </ul>
+        <a class="tier-cta" href="#" data-modal="apply" data-magnetic>申请 →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- timeline -->
+<section class="timeline">
+  <div class="timeline-wrap">
+    <div class="section-title-wrap">
+      <h2 class="section-title" data-scramble>// 02 · 申请流程 — HOW TO JOIN</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-label" data-scramble>Apply</div>
+        <p class="step-text">点击「立即申请」，填写并提交表单</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-label" data-scramble>Review</div>
+        <p class="step-text">等待评估，通常 3 个工作日内完成</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-label" data-scramble>Notify</div>
+        <p class="step-text">评估通过后，邮箱将收到通知</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-label" data-scramble>Receive</div>
+        <p class="step-text">登录 AtomCode 开放平台，24h 内自动到账</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="faq-wrap">
+    <div class="faq-title-wrap">
+      <h2 class="faq-title" data-scramble>// 03 · 常见问题 — FAQ</h2>
+    </div>
+    <div class="faq-list" id="faqList">
+      <div class="faq-item open">
+        <div class="faq-item-inner">
+          <h3 class="faq-q"><span><span class="num">01</span>什么是 AtomCode 原子创造者激励计划？</span><span class="chev">+</span></h3>
+          <div class="faq-a">
+            AtomCode 原子创造者激励计划是 AtomCode 面向全球高质量、AI 驱动开发者的限时 Token 定向发放活动。我们计划在 30 天内发放总计 1000 亿 Token 权益，完全免费。每一份申请都会经过仔细评估，我们希望将资源交到真正用 AI 进行创造的开发者手中。
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-item-inner">
+          <h3 class="faq-q"><span><span class="num">02</span>AtomCode 是什么？</span><span class="chev">+</span></h3>
+          <div class="faq-a">
+            AtomCode 是面向开发者的 AI 编程平台，提供自研代码大模型与开放平台 API 推理服务，可直接对接 <a href="#">Claude Code</a>、<a href="#">Cursor</a>、<a href="#">OpenClaw</a> 等主流编程工具。V3 是当前最新系列，包含旗舰推理模型、多模态模型与代码补全模型。
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-item-inner">
+          <h3 class="faq-q"><span><span class="num">03</span>活动时间和参与资格？</span><span class="chev">+</span></h3>
+          <div class="faq-a">
+            北京时间 2026 年 5 月 12 日 00:00 至 6 月 11 日 00:00（UTC 5 月 11 日 16:00 至 6 月 10 日 16:00），共 30 天，赠完即止。面向全球所有用户开放，个人开发者、团队、企业均可参与。
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-item-inner">
+          <h3 class="faq-q"><span><span class="num">04</span>如何加入该项目？</span><span class="chev">+</span></h3>
+          <div class="faq-a">
+            <ul class="list">
+              <li>在本页面点击「立即申请」，填写并提交表单</li>
+              <li>等待评估（约 3 个工作日）</li>
+              <li>评估通过后，你会收到一封通知邮件</li>
+              <li>使用你填写的邮箱登录或注册 <a href="#">AtomCode 开放平台</a></li>
+              <li>权益会在你收到邮件后的 24h 内到账</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-item-inner">
+          <h3 class="faq-q"><span><span class="num">05</span>如何确保权益顺利发放？</span><span class="chev">+</span></h3>
+          <div class="faq-a">
+            请在提交表单前务必确认以下事项，否则可能导致权益无法到账：
+            <ul class="list">
+              <li>已有 AtomCode 账号？请确保它已由你在表单中填写的邮箱注册；若由手机号注册，请绑定该邮箱。<a href="#">前往绑定</a></li>
+              <li>还没有 AtomCode 账号？请在收到评估通过的邮件后，使用同一邮箱完成注册。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-item-inner">
+          <h3 class="faq-q"><span><span class="num">06</span>我会获得什么权益？</span><span class="chev">+</span></h3>
+          <div class="faq-a">
+            我们会根据你表单填写的内容以及你的开放平台账号状态，发放不同额度、不同档位的 Token Plan 或不同金额的赠金，完全免费。
+            <ul class="list">
+              <li><b>Token Plan</b> — 开放平台订阅制套餐，可直接配置到 Claude Code、Cursor 等编程工具中使用 AtomCode 系列模型；</li>
+              <li><b>赠金</b> — 直接充入开放平台账户余额，用于按量计费的 API 调用消费。</li>
+            </ul>
+            具体权益以到账为准。
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-item-inner">
+          <h3 class="faq-q"><span><span class="num">07</span>评估标准是什么？</span><span class="chev">+</span></h3>
+          <div class="faq-a">
+            我们会根据你提交的表单内容进行综合评估，包括你使用的 AI 工具、底层模型、项目描述和证明材料。填写越详细、项目越具体，评估通过率和权益档位越高。评估通过后系统会通过邮件通知你；如果 3 天内未收到邮件，可以尝试重新提交。
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-item-inner">
+          <h3 class="faq-q"><span><span class="num">08</span>权益有有效期吗？</span><span class="chev">+</span></h3>
+          <div class="faq-a">
+            有。不同档位的权益有效期以到账提示为准，过期未使用的权益将自动失效，请及时使用和体验。
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-item-inner">
+          <h3 class="faq-q"><span><span class="num">09</span>没收到邮件怎么办？</span><span class="chev">+</span></h3>
+          <div class="faq-a">
+            <ul class="list">
+              <li>检查垃圾邮件箱</li>
+              <li>确认你在表单中填写的邮箱地址是否正确</li>
+              <li>权益发放可能有延迟，若 3 个工作日内仍未收到，可以尝试重新申请</li>
+              <li>如仍未收到，请通过 AtomCode 开放平台「<a href="#">联系我们</a>」进行反馈</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-item-inner">
+          <h3 class="faq-q"><span><span class="num">10</span>「申请用邮箱」和 AtomCode 账号绑定邮箱不一致怎么办？</span><span class="chev">+</span></h3>
+          <div class="faq-a">
+            针对该场景，我们提供两种解决方案：
+            <ul class="list">
+              <li>使用「申请用邮箱」注册新的 AtomCode 账号，并登录开放平台即可接收权益；</li>
+              <li>将原有 AtomCode 账号的邮箱换绑为「申请用邮箱」（如无绑定邮箱可直接绑定）。<a href="#">前往更换</a></li>
+            </ul>
+            权益会在 24 小时内自动到账。如暂未到账可稍作等待，感谢您的支持与理解。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- footer -->
+<footer class="ftr">
+  深入了解 AtomCode · <a href="#">官网</a> / <a href="#">开放平台</a> / <a href="#">模型体验</a> / <a href="#">文档</a>
+  <br>© 2026 AtomCode. All rights reserved.
+</footer>
+
+<!-- apply modal -->
+<div class="overlay" id="overlay">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlgTtl">
+    <div class="dialog-head">
+      <span class="ttl" id="dlgTtl">// 申请 ATOMCODE 100B</span>
+      <button class="dialog-close" id="closeDlg" aria-label="关闭">×</button>
+    </div>
+    <form class="dialog-body" id="applyForm">
+      <div class="field">
+        <label for="f-name">姓名 / NAME</label>
+        <input id="f-name" required placeholder="你的名字">
+      </div>
+      <div class="field">
+        <label for="f-email">申请用邮箱 / EMAIL</label>
+        <input id="f-email" type="email" required placeholder="name@domain.com">
+      </div>
+      <div class="field">
+        <label for="f-role">身份 / ROLE</label>
+        <select id="f-role" required>
+          <option value="">选择身份</option>
+          <option>个人开发者</option>
+          <option>团队 / 创业公司</option>
+          <option>企业</option>
+          <option>研究机构 / 高校</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-tools">常用 AI 工具 / TOOLS</label>
+        <input id="f-tools" placeholder="例如：Claude Code、Cursor、OpenClaw…">
+      </div>
+      <div class="field">
+        <label for="f-project">项目描述 / PROJECT</label>
+        <textarea id="f-project" required placeholder="简要描述你的项目场景、规模与对 AtomCode 的预期用法（填写越详细，评估通过率越高）"></textarea>
+      </div>
+      <button type="submit" class="submit-btn" data-magnetic>提交申请 → SUBMIT</button>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ 申请已提交 · 请留意邮箱通知</div>
+
+<script>
+/* ========== scroll progress bar ========== */
+(function(){
+  const bar=document.getElementById('progressBar');
+  const hero=document.querySelector('.hero');
+  function tick(){
+    const max=Math.max(1,document.documentElement.scrollHeight-innerHeight);
+    const p=Math.min(1,Math.max(0,scrollY/max));
+    bar.style.width=(p*100).toFixed(2)+'%';
+    bar.classList.toggle('past-hero',scrollY>(hero?hero.offsetHeight-80:300));
+  }
+  tick();
+  addEventListener('scroll',tick,{passive:true});
+  addEventListener('resize',tick);
+})();
+
+/* ========== magnetic buttons (hover-distance pull) ========== */
+(function(){
+  const els=Array.from(document.querySelectorAll('[data-magnetic]')).map(el=>({
+    el,tx:0,ty:0,x:0,y:0,near:false
+  }));
+  let mx=-9999,my=-9999;
+  addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+  function loop(){
+    for(const item of els){
+      const r=item.el.getBoundingClientRect();
+      if(r.bottom<-200||r.top>innerHeight+200){
+        item.tx=item.ty=0;
+        if(item.near){item.near=false;item.el.classList.remove('is-near')}
+      } else {
+        const cx=r.left+r.width/2, cy=r.top+r.height/2;
+        const dx=mx-cx, dy=my-cy;
+        const dist=Math.hypot(dx,dy);
+        const radius=Math.max(r.width,r.height)*1.4 + 30;
+        if(dist<radius){
+          const k=(1-dist/radius);
+          item.tx=dx*k*0.32;
+          item.ty=dy*k*0.32;
+          if(!item.near){item.near=true;item.el.classList.add('is-near')}
+        } else {
+          item.tx=0;item.ty=0;
+          if(item.near){item.near=false;item.el.classList.remove('is-near')}
+        }
+      }
+      item.x+=(item.tx-item.x)*0.22;
+      item.y+=(item.ty-item.y)*0.22;
+      if(Math.abs(item.x)<.05 && Math.abs(item.y)<.05){
+        item.el.style.transform='';
+      } else {
+        item.el.style.transform=`translate(${item.x.toFixed(2)}px,${item.y.toFixed(2)}px)`;
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ========== character scramble on hover ========== */
+(function(){
+  const POOL_ASCII='!<>-_\\/[]{}—=+*^?#@$%&|~01';
+  const POOL_CJK='零壹贰叁肆伍陆柒捌玖原码原子计算激励';
+  function scramble(el){
+    if(el._busy) return;
+    const original=el.dataset._text||el.textContent;
+    el.dataset._text=original;
+    const chars=Array.from(original);
+    const total=Math.max(18,chars.length*2+10);
+    let f=0;
+    el._busy=true;
+    function step(){
+      let out='';
+      for(let i=0;i<chars.length;i++){
+        const ch=chars[i];
+        const start=(i/chars.length)*total*0.55;
+        const end=start+total*0.35;
+        if(f>=end||/[\s,.·—:;\/\(\)\[\]]/.test(ch)){out+=ch;continue}
+        if(f<start){out+=ch;continue}
+        const pool=/[A-Za-z0-9]/.test(ch)?POOL_ASCII
+                  :/[一-龥]/.test(ch)?POOL_CJK
+                  :POOL_ASCII;
+        out+=pool[(Math.random()*pool.length)|0];
+      }
+      el.textContent=out;
+      f++;
+      if(f<total) requestAnimationFrame(step);
+      else {el.textContent=original;el._busy=false}
+    }
+    step();
+  }
+  document.querySelectorAll('[data-scramble]').forEach(el=>{
+    el.dataset._text=el.textContent;
+    el.addEventListener('mouseenter',()=>scramble(el));
+  });
+})();
+
+/* ========== page-wide aurora glow + click ripple ========== */
+(function(){
+  const aurora=document.getElementById('aurora');
+  let tx=-300,ty=-300,x=tx,y=ty;
+  addEventListener('mousemove',e=>{tx=e.clientX;ty=e.clientY});
+  addEventListener('mouseleave',()=>{tx=-300;ty=-300});
+  (function tick(){
+    x+=(tx-x)*0.18;y+=(ty-y)*0.18;
+    aurora.style.setProperty('--mx',x+'px');
+    aurora.style.setProperty('--my',y+'px');
+    requestAnimationFrame(tick);
+  })();
+  // click ripple
+  addEventListener('click',e=>{
+    if(e.target.closest('input,textarea,select')) return;
+    const r=document.createElement('div');
+    r.className='ripple';
+    r.style.left=e.clientX+'px';
+    r.style.top=e.clientY+'px';
+    document.body.appendChild(r);
+    setTimeout(()=>r.remove(),700);
+  });
+})();
+
+/* ========== tier 3D tilt + spotlight ========== */
+(function(){
+  const tiers=document.querySelectorAll('.tier');
+  tiers.forEach(t=>{
+    let raf=0,tx=0,ty=0,rx=0,ry=0;
+    function apply(){
+      rx+=(tx-rx)*0.18;
+      ry+=(ty-ry)*0.18;
+      t.style.transform=`perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
+      if(Math.abs(tx-rx)>.05||Math.abs(ty-ry)>.05) raf=requestAnimationFrame(apply);
+      else raf=0;
+    }
+    t.addEventListener('mousemove',e=>{
+      const r=t.getBoundingClientRect();
+      const px=(e.clientX-r.left)/r.width;
+      const py=(e.clientY-r.top)/r.height;
+      t.style.setProperty('--sx',(px*100)+'%');
+      t.style.setProperty('--sy',(py*100)+'%');
+      ty=(px-0.5)*8;   // rotateY
+      tx=(0.5-py)*6;   // rotateX
+      if(!raf) raf=requestAnimationFrame(apply);
+    });
+    t.addEventListener('mouseleave',()=>{
+      tx=0;ty=0;
+      const ease=()=>{
+        rx+=(0-rx)*0.18;ry+=(0-ry)*0.18;
+        t.style.transform=`perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+        if(Math.abs(rx)>.05||Math.abs(ry)>.05) requestAnimationFrame(ease);
+        else t.style.transform='';
+      };
+      ease();
+    });
+  });
+})();
+
+/* ========== magnetic step numbers ========== */
+(function(){
+  document.querySelectorAll('.step-num').forEach(el=>{
+    const parent=el.parentElement;
+    parent.addEventListener('mousemove',e=>{
+      const r=el.getBoundingClientRect();
+      const cx=r.left+r.width/2;
+      const cy=r.top+r.height/2;
+      const dx=(e.clientX-cx)*0.22;
+      const dy=(e.clientY-cy)*0.22;
+      el.style.transform=`translate(${dx}px,${dy}px)`;
+    });
+    parent.addEventListener('mouseleave',()=>{
+      el.style.transform='';
+    });
+  });
+})();
+
+/* ========== hero parallax (title + token) ========== */
+(function(){
+  const hero=document.querySelector('.hero');
+  const title=document.querySelector('.hero-title');
+  const tok=document.querySelector('.token-block');
+  if(!hero||!title) return;
+  let tx=0,ty=0,x=0,y=0;
+  hero.addEventListener('mousemove',e=>{
+    const r=hero.getBoundingClientRect();
+    tx=((e.clientX-r.left)/r.width-0.5);
+    ty=((e.clientY-r.top)/r.height-0.5);
+  });
+  hero.addEventListener('mouseleave',()=>{tx=0;ty=0});
+  (function tick(){
+    x+=(tx-x)*0.08;y+=(ty-y)*0.08;
+    title.style.transform=`translate(${x*-14}px,${y*-8}px)`;
+    if(tok) tok.style.transform=`translate(${x*8}px,${y*4}px)`;
+    requestAnimationFrame(tick);
+  })();
+})();
+
+/* ========== code-rain background ========== */
+const CodeBG = (function(){
+  const cv=document.getElementById('codeBg');
+  const ctx=cv.getContext('2d');
+  let W,H,DPR;
+  const FONT_PX=14;        // CSS px
+  const LINE_H=20;         // CSS px
+  const PAD_X=8;
+  function resize(){
+    DPR=Math.min(window.devicePixelRatio||1,2);
+    W=cv.width=Math.floor(innerWidth*DPR);
+    H=cv.height=Math.floor(cv.parentElement.parentElement.clientHeight*DPR);
+    cv.style.width=innerWidth+'px';
+    cv.style.height=cv.parentElement.parentElement.clientHeight+'px';
+  }
+  resize();addEventListener('resize',resize);
+
+  const SNIPPETS=[
+    "import { Agent, Tools } from '@atomcode/sdk';",
+    "const client = new AtomCode({ apiKey: process.env.ATOM_KEY });",
+    "const agent = new Agent({ model: 'atom-v3-opus-1m' });",
+    "async function grant(applicant) {",
+    "  const tier = await evaluate(applicant.project);",
+    "  return tier === 'creator' ? mint(30e8) : mint(5e8);",
+    "}",
+    "// remaining: 99,847,123,456 tokens · burn ~1,750/s",
+    "if (await applicant.email.verified) approve(applicant);",
+    "const stream = await client.messages.stream({",
+    "  model: 'atom-v3-opus', max_tokens: 4096, temperature: 0.2,",
+    "  messages: [{ role: 'user', content: prompt }],",
+    "});",
+    "for await (const chunk of stream) yield chunk.delta;",
+    "export default async function applyForGrant(req) {",
+    "  const { email, project, tier } = await req.json();",
+    "  await db.applications.insert({ email, project, tier });",
+    "  await mail.send(email, 'application-received');",
+    "  return Response.json({ status: 'queued' });",
+    "}",
+    "type Plan = 'starter' | 'creator' | 'enterprise';",
+    "interface Grant { plan: Plan; tokens: number; expiresAt: Date }",
+    "const PLAN_QUOTA: Record<Plan, number> = {",
+    "  starter:     5_00_000_000,",
+    "  creator:    30_00_000_000,",
+    "  enterprise: 100_00_000_000,",
+    "};",
+    "// atomcode.io · 100B tokens · 30 days · global launch",
+    "function* mintTokens(plan: Plan) {",
+    "  let remaining = PLAN_QUOTA[plan];",
+    "  while (remaining > 0) {",
+    "    const batch = Math.min(1024, remaining);",
+    "    yield { ts: Date.now(), batch };",
+    "    remaining -= batch;",
+    "  }",
+    "}",
+    "// connect: claude code · cursor · openclaw · windsurf · zed",
+    "const tools: Tools = [search, fs, exec, browser, mcp];",
+    "await agent.run({ goal, tools, budget: 50_000 });",
+    "console.log(`grant ok · ${plan} · ${tokens.toLocaleString()}`);",
+    "for (const app of pending) await reviewer.evaluate(app);",
+    "const completion = await editor.complete(buffer, cursor);",
+    "// AtomCode V3 · ctx: 1M · out: 64k · vision: ✓ · code: ✓",
+    "git checkout -b feat/atomcode-incentive",
+    "npm i @atomcode/sdk @atomcode/agent",
+    "curl -X POST https://api.atomcode.io/v1/grants \\",
+    "  -H \"authorization: Bearer $ATOM_KEY\" \\",
+    "  -d '{\"email\":\"you@dev.com\",\"plan\":\"creator\"}'",
+    "// reviewers assess project depth within 3 business days",
+    "if (project.depth > THRESHOLD) upgrade(applicant, 'creator');",
+    "const accent = '#e8a050'; const ink = '#0d0d0d';",
+    "// every applicant gets a personal reply — no auto-rejects",
+    "function diff(a: string, b: string): Patch[] { /* ... */ }",
+    "await fs.writeFile('grant.json', JSON.stringify(grant, null, 2));",
+    "process.on('SIGINT', () => agent.gracefulStop());",
+    "@dataclass",
+    "class TokenPlan: tokens: int; expires: datetime",
+    "    def can_burn(self, n: int) -> bool: return n <= self.tokens",
+    "let burned = 0; setInterval(() => burned += 1750, 1000);",
+    "// 关注 @atomcode · feedback → support@atomcode.io",
+  ];
+  const MUT_CHARS="abcdefghijklmnopqrstuvwxyz0123456789(){}[]<>/=+-*!?_;:,.";
+
+  const rows=[];
+  function buildLine(){
+    // concat several snippets so each row visually fills the entire viewport width
+    const targetChars=Math.ceil(innerWidth/8)+40; // ~8px per mono char
+    let t=SNIPPETS[(Math.random()*SNIPPETS.length)|0];
+    while(t.length<targetChars){
+      t += '   ' + SNIPPETS[(Math.random()*SNIPPETS.length)|0];
+    }
+    return t;
+  }
+  function mkRow(){
+    return{
+      text:buildLine(),
+      alpha:0.42+Math.random()*0.45,
+      accent:Math.random()<.10,
+      bright:Math.random()<.05,
+    };
+  }
+  function ensureRows(){
+    const need=Math.ceil(cv.parentElement.parentElement.clientHeight/LINE_H)+20;
+    while(rows.length<need) rows.push(mkRow());
+    while(rows.length>need) rows.pop();
+  }
+  ensureRows();
+  addEventListener('resize',ensureRows);
+
+  let scrollY=0,frame=0;
+  function loop(){
+    frame++;
+    ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);
+    ctx.font=`${FONT_PX*DPR}px Menlo,Monaco,Consolas,"Courier New",monospace`;
+    ctx.textBaseline='top';
+    scrollY+=0.32;
+    const off=scrollY%LINE_H;
+    for(let i=0;i<rows.length;i++){
+      const r=rows[i];
+      const y=((i-1)*LINE_H - off)*DPR;
+      if(y<-LINE_H*DPR||y>H) continue;
+      if(r.bright){
+        ctx.fillStyle=`rgba(255,255,255,${Math.min(1,r.alpha+.35)})`;
+      } else if(r.accent){
+        ctx.fillStyle=`rgba(232,160,80,${r.alpha+.1})`;
+      } else {
+        ctx.fillStyle=`rgba(210,212,216,${r.alpha})`;
+      }
+      ctx.fillText(r.text, PAD_X*DPR, y);
+    }
+    // gentle scan tint — light so the code stays readable
+    ctx.fillStyle='rgba(0,0,0,.08)';
+    for(let y=0;y<H;y+=3*DPR) ctx.fillRect(0,y,W,DPR);
+
+    // scroll a full line: pop top, push fresh row
+    if(scrollY>=LINE_H){
+      scrollY-=LINE_H;
+      rows.shift();
+      rows.push(mkRow());
+    }
+    // mutate a few characters per frame — code "in motion"
+    for(let k=0;k<3;k++){
+      const ri=(Math.random()*rows.length)|0;
+      const r=rows[ri];
+      if(r.text.length>3){
+        const ci=(Math.random()*r.text.length)|0;
+        if(/[A-Za-z0-9]/.test(r.text[ci])){
+          r.text=r.text.slice(0,ci)+MUT_CHARS[(Math.random()*MUT_CHARS.length)|0]+r.text.slice(ci+1);
+        }
+      }
+    }
+    // occasionally bump a row to "bright" (cursor lands on it)
+    if(frame%24===0){
+      rows.forEach(r=>{ if(r.bright && Math.random()<.5) r.bright=false; });
+      const ri=(Math.random()*rows.length)|0;
+      rows[ri].bright=true;
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  return { canvas:cv, dpr:()=>DPR };
+})();
+
+/* ========== magnifier cursor ========== */
+(function(){
+  const mag=document.getElementById('magnifier');
+  const mcv=document.getElementById('magCanvas');
+  const mctx=mcv.getContext('2d');
+  const hero=document.querySelector('.hero');
+  const SIZE=260;          // CSS px (must match .magnifier width)
+  const ZOOM=2.6;
+  let DPR=1;
+  function size(){
+    DPR=Math.min(window.devicePixelRatio||1,2);
+    mcv.width=SIZE*DPR;
+    mcv.height=SIZE*DPR;
+    mcv.style.width=SIZE+'px';
+    mcv.style.height=SIZE+'px';
+  }
+  size();addEventListener('resize',size);
+
+  let tx=-9999,ty=-9999,x=tx,y=ty,active=false;
+
+  // elements where the magnifier should NOT appear (clickable / interactive)
+  const EXCLUDE='.waitlist-btn,.scroll-down,.hdr,.icon-btn,.share-btn,.wechat-pop';
+
+  function onMove(e){
+    tx=e.clientX;ty=e.clientY;
+    const t=e.target;
+    const overHero=!!(t && t.closest && t.closest('.hero'));
+    const overExclude=!!(t && t.closest && t.closest(EXCLUDE));
+    const should=overHero && !overExclude;
+    if(should!==active){
+      active=should;
+      mag.style.opacity=active?1:0;
+      // when over excluded interactive element inside hero, give it the system cursor
+      document.body.style.cursor = overHero && !overExclude ? 'none' : 'auto';
+    }
+  }
+  addEventListener('mousemove',onMove);
+  addEventListener('mouseleave',()=>{
+    active=false;mag.style.opacity=0;document.body.style.cursor='auto';
+  });
+
+  function loop(){
+    x+=(tx-x)*0.30;y+=(ty-y)*0.30;
+    mag.style.transform=`translate(${x}px,${y}px) translate(-50%,-50%)`;
+    if(active){
+      const code=CodeBG.canvas;
+      const heroRect=hero.getBoundingClientRect();
+      const cDPR=CodeBG.dpr();
+      const srcW=SIZE/ZOOM;
+      const srcH=SIZE/ZOOM;
+      const cx=x-heroRect.left;
+      const cy=y-heroRect.top;
+      const sx=(cx-srcW/2)*cDPR;
+      const sy=(cy-srcH/2)*cDPR;
+      mctx.fillStyle='#0a0a0a';
+      mctx.fillRect(0,0,mcv.width,mcv.height);
+      try{
+        mctx.drawImage(code,sx,sy,srcW*cDPR,srcH*cDPR,0,0,mcv.width,mcv.height);
+      }catch(e){}
+      // subtle brighten + cool rim inside the lens
+      mctx.globalCompositeOperation='lighter';
+      mctx.fillStyle='rgba(255,255,255,.05)';
+      mctx.fillRect(0,0,mcv.width,mcv.height);
+      mctx.globalCompositeOperation='source-over';
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ========== typewriter title ========== */
+(function(){
+  const el=document.getElementById('typed');
+  const phrases=[
+    'AtomCode 原子创造者激励计划',
+    '1000 亿 Tokens · 限时发放中',
+    '把算力交给真正的创造者'
+  ];
+  let pi=0,ci=0,deleting=false;
+  function step(){
+    const cur=phrases[pi];
+    if(!deleting){
+      ci++;
+      el.textContent=cur.slice(0,ci);
+      if(ci===cur.length){deleting=true;return setTimeout(step,1800);}
+    }else{
+      ci--;
+      el.textContent=cur.slice(0,ci);
+      if(ci===0){deleting=false;pi=(pi+1)%phrases.length;}
+    }
+    setTimeout(step,deleting?34:78);
+  }
+  step();
+})();
+
+/* ========== countdown + tokens-left ticker ========== */
+(function(){
+  const cdEl=document.getElementById('countdown');
+  const tEl=document.getElementById('tokensLeft');
+  const end=new Date(Date.now()+30*24*60*60*1000); // 30 days from now
+  const total=100000000000;
+  const start=Date.now();
+  function pad(n){return String(n).padStart(2,'0')}
+  function tick(){
+    const now=Date.now();
+    const diff=Math.max(0,end-now);
+    const d=Math.floor(diff/86400000);
+    const h=Math.floor(diff/3600000)%24;
+    const m=Math.floor(diff/60000)%60;
+    const s=Math.floor(diff/1000)%60;
+    cdEl.textContent=`倒计时 ${d}D ${pad(h)}:${pad(m)}:${pad(s)}`;
+    // simulate burn-down — visual only
+    const elapsed=(now-start)/1000;
+    const burned=Math.floor(elapsed*1750 + Math.sin(elapsed)*420);
+    const left=total-burned;
+    tEl.textContent=left.toLocaleString('en-US');
+  }
+  tick();setInterval(tick,1000);
+})();
+
+/* ========== header color transition on scroll ========== */
+(function(){
+  const hdr=document.getElementById('hdr');
+  const hero=document.querySelector('.hero');
+  function check(){
+    const past=window.scrollY > hero.offsetHeight - 80;
+    hdr.classList.toggle('past-hero',past);
+  }
+  check();window.addEventListener('scroll',check,{passive:true});
+})();
+
+/* ========== FAQ accordion ========== */
+(function(){
+  document.querySelectorAll('.faq-item').forEach(it=>{
+    it.addEventListener('click',e=>{
+      if(e.target.closest('a')) return;
+      it.classList.toggle('open');
+    });
+  });
+})();
+
+/* ========== modal ========== */
+(function(){
+  const ov=document.getElementById('overlay');
+  const close=document.getElementById('closeDlg');
+  const toast=document.getElementById('toast');
+  document.querySelectorAll('[data-modal="apply"]').forEach(el=>{
+    el.addEventListener('click',e=>{e.preventDefault();ov.classList.add('show')});
+  });
+  close.addEventListener('click',()=>ov.classList.remove('show'));
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('show')});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')ov.classList.remove('show')});
+  document.getElementById('applyForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    ov.classList.remove('show');
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'),2200);
+    e.target.reset();
+  });
+  document.getElementById('shareBtn').addEventListener('click',()=>{
+    if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(()=>{});}
+    else{navigator.clipboard&&navigator.clipboard.writeText(location.href);toast.textContent='✓ 链接已复制';toast.classList.add('show');setTimeout(()=>{toast.classList.remove('show');toast.textContent='✓ 申请已提交 · 请留意邮箱通知';},1800);}
+  });
+})();
+
+/* ========== scroll-reveal for tiers / steps ========== */
+(function(){
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting){
+        en.target.style.opacity=1;
+        en.target.style.transform='translateY(0)';
+      }
+    });
+  },{threshold:.15});
+  document.querySelectorAll('.tier, .step').forEach((el,i)=>{
+    el.style.opacity=0;
+    el.style.transform='translateY(20px)';
+    el.style.transition=`opacity .6s ease ${i*0.08}s, transform .6s ease ${i*0.08}s, border-color .25s, background .25s`;
+    io.observe(el);
+  });
+})();
+</script>
+</body>
+</html>
